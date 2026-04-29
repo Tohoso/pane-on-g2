@@ -19,9 +19,23 @@ import {
 } from "./slot-state";
 import { formatStatusIndicator } from "./status-indicator";
 
-const apiBase = import.meta.env.VITE_PANE_ON_G2_API_BASE || "";
-const token = import.meta.env.VITE_PANE_ON_G2_TOKEN || "dev-token";
-const appLabel = import.meta.env.VITE_PANE_ON_G2_LABEL || "g2";
+// Runtime config priority: localStorage > build-time env > defaults.
+// This makes the .ehpk reusable across self-hosters without rebuilding.
+const STORAGE_KEY = "pane-on-g2.config.v1";
+type RuntimeConfig = { apiBase: string; token: string; label: string };
+function loadStoredConfig(): Partial<RuntimeConfig> {
+  try {
+    const raw = globalThis.localStorage?.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) as Partial<RuntimeConfig> : {};
+  } catch { return {}; }
+}
+function saveStoredConfig(cfg: RuntimeConfig): void {
+  try { globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(cfg)); } catch { /* localStorage unavailable */ }
+}
+const stored = loadStoredConfig();
+const apiBase = stored.apiBase ?? import.meta.env.VITE_PANE_ON_G2_API_BASE ?? "";
+let token = stored.token ?? import.meta.env.VITE_PANE_ON_G2_TOKEN ?? "";
+const appLabel = stored.label ?? import.meta.env.VITE_PANE_ON_G2_LABEL ?? "g2";
 const app = document.querySelector<HTMLDivElement>("#app");
 const G2_BODY_CHARS = 240;
 const G2_SCROLL_STEP_CHARS = 80;
@@ -57,7 +71,10 @@ app.innerHTML = `
         <p class="eyebrow">Even G2</p>
         <h1 id="title">${appLabel}:cc</h1>
       </div>
-      <span id="status" class="status">idle</span>
+      <div class="topbar-actions">
+        <span id="status" class="status">idle</span>
+        <button id="settings-btn" class="settings-btn" type="button" aria-label="settings">⚙</button>
+      </div>
     </header>
 
     <nav id="slot-selector" class="slot-selector" aria-label="slots"></nav>
@@ -81,6 +98,26 @@ app.innerHTML = `
       <textarea id="prompt-text" rows="3" placeholder="Send text to the selected slot"></textarea>
       <button type="submit">Send</button>
     </form>
+
+    <dialog id="settings-modal" class="settings-modal">
+      <form id="settings-form" method="dialog" class="settings-form">
+        <h2>Server settings</h2>
+        <p class="settings-hint">Point this app at your self-hosted pane-on-g2 server. Stored in your device's localStorage.</p>
+        <label>API base URL
+          <input id="settings-api" type="url" required placeholder="http://100.x.x.x:3457" />
+        </label>
+        <label>Bearer token
+          <input id="settings-token" type="text" required placeholder="64-char hex from .env.prod" autocomplete="off" />
+        </label>
+        <label>Display label
+          <input id="settings-label" type="text" placeholder="g2" />
+        </label>
+        <div class="settings-actions">
+          <button type="button" id="settings-cancel" class="settings-cancel">Cancel</button>
+          <button type="submit" id="settings-save" class="settings-save">Save & reload</button>
+        </div>
+      </form>
+    </dialog>
   </main>
 `;
 
@@ -93,6 +130,34 @@ const ringRepliesEl = document.querySelector<HTMLElement>("#ring-replies")!;
 const sourceFiltersEl = document.querySelector<HTMLElement>("#source-filters")!;
 const audioIndicatorEl = document.querySelector<HTMLElement>("#audio-indicator")!;
 const debugHudEl = document.querySelector<HTMLElement>("#debug-hud")!;
+const settingsBtnEl = document.querySelector<HTMLButtonElement>("#settings-btn")!;
+const settingsModalEl = document.querySelector<HTMLDialogElement>("#settings-modal")!;
+const settingsFormEl = document.querySelector<HTMLFormElement>("#settings-form")!;
+const settingsApiEl = document.querySelector<HTMLInputElement>("#settings-api")!;
+const settingsTokenEl = document.querySelector<HTMLInputElement>("#settings-token")!;
+const settingsLabelEl = document.querySelector<HTMLInputElement>("#settings-label")!;
+const settingsCancelEl = document.querySelector<HTMLButtonElement>("#settings-cancel")!;
+function openSettingsModal() {
+  settingsApiEl.value = apiBase;
+  settingsTokenEl.value = token;
+  settingsLabelEl.value = appLabel;
+  settingsModalEl.showModal?.();
+}
+settingsBtnEl.addEventListener("click", openSettingsModal);
+settingsCancelEl.addEventListener("click", () => settingsModalEl.close?.());
+settingsFormEl.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveStoredConfig({
+    apiBase: settingsApiEl.value.trim().replace(/\/+$/, ""),
+    token: settingsTokenEl.value.trim(),
+    label: (settingsLabelEl.value.trim() || "g2"),
+  });
+  globalThis.location?.reload?.();
+});
+// First-launch prompt: if no token configured, force the modal open before boot.
+if (!token || token === "dev-token") {
+  queueMicrotask(() => openSettingsModal());
+}
 const transcriptScrollTracker = bindTranscriptUserScrollTracker(transcriptLogEl);
 const debugLog: string[] = [];
 function setDebug(entry?: string) {

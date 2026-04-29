@@ -2,7 +2,7 @@
   "package_id": "io.github.tohoso.paneong2",
   "edition": "202601",
   "name": "pane-on-g2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "min_app_version": "1.0.0",
   "min_sdk_version": "0.0.7",
   "tagline": "Mirror tmux panes to Even Realities G2",
@@ -12,10 +12,18 @@
   "permissions": [
     {
       "name": "network",
-      "desc": "Stream tmux pane snapshots from the user's pane-on-g2 server (typically Tailscale-hosted) and send transcribed input back.",
+      "desc": "Stream tmux pane snapshots from the user's self-hosted pane-on-g2 server. Whitelist covers Tailscale (100.x, *.ts.net), LAN (192.168.x, 10.x, 172.x), and localhost so users can self-host without rebuilding.",
       "whitelist": [
-        "http://localhost:3457",
-        "http://127.0.0.1:3457"
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+        "http://100.*:*",
+        "http://192.168.*:*",
+        "http://10.*:*",
+        "http://172.*:*",
+        "https://*.ts.net",
+        "https://*.ts.net:*",
+        "wss://*.ts.net",
+        "wss://*.ts.net:*"
       ]
     },
     {

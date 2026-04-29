@@ -99,6 +99,103 @@ h1 {
   accent-color: #8ee8b2;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-btn {
+  font-size: 18px;
+  background: transparent;
+  border: 1px solid #35624f;
+  color: #c9ead8;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: auto;
+  min-height: auto;
+}
+
+.settings-modal {
+  border: 1px solid #35624f;
+  border-radius: 12px;
+  background: #0b1c15;
+  color: #e8f4ec;
+  padding: 0;
+  max-width: 480px;
+  width: 92vw;
+}
+
+.settings-modal::backdrop {
+  background: rgba(6, 17, 13, 0.78);
+}
+
+.settings-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-form h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #8ee8b2;
+}
+
+.settings-hint {
+  margin: 0;
+  color: #97b8a7;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #c9ead8;
+}
+
+.settings-form input {
+  border: 1px solid #35624f;
+  background: #06110d;
+  color: #e8f4ec;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.settings-cancel {
+  background: transparent;
+  border: 1px solid #35624f;
+  color: #c9ead8;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: auto;
+}
+
+.settings-save {
+  background: #8ee8b2;
+  border: 0;
+  color: #07110d;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: auto;
+}
+
 .audio-indicator {
   border: 1px solid #7d332e;
   border-radius: 6px;
