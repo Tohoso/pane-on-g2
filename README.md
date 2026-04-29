@@ -124,6 +124,29 @@ corepack pnpm -r test
 corepack pnpm --filter @pane-on-g2/frontend build
 ```
 
+## Packaging for Even Hub Dev Portal
+
+`pane-on-g2` ships as an Even Hub Package (`.ehpk`) you can sideload onto your G2.
+
+```bash
+corepack pnpm run ehpk
+# → produces pane-on-g2.ehpk in the repo root
+```
+
+Steps to publish your own beta build:
+
+1. **Configure your token + bind** in `frontend/.env.production`
+   (`VITE_PANE_ON_G2_TOKEN`, `VITE_PANE_ON_G2_API_BASE`, `VITE_PANE_ON_G2_LABEL`)
+2. **Update `app.json`**:
+   - `permissions[0].whitelist` — add your server URL (e.g. `https://your-host.tail-net.ts.net`)
+   - `package_id` — choose a unique reverse-DNS id you own
+3. `corepack pnpm run ehpk`
+4. Upload `pane-on-g2.ehpk` to <https://hub.evenrealities.com/dev>
+5. Flip the build's status from **Private** to **Beta** and add yourself (and any testers) as testers — invite links are time-limited
+6. On your iPhone, tap the invite from the Even Realities app → install → launch "pane-on-g2"
+
+The Vite bundle inside the `.ehpk` embeds your token at build time. Treat the `.ehpk` like an API key — rotate the token if you share or publish it.
+
 ## Acknowledgements
 
 Thanks to `wmoto-ai/cc-g2` and `Tohoso/tmux-on-g2` for prior art around Claude Code, tmux, and Even Realities G2 workflows.

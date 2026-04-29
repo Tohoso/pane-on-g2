@@ -7,3 +7,4 @@ server/dist/
 .env.local
 .env.prod
 frontend/.env.production
+*.ehpk
