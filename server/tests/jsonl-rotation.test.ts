@@ -20,17 +20,16 @@ function makeClaudeProject(slot: string) {
 
 afterEach(() => {
   vi.resetModules();
-  delete process.env[`${String.fromCharCode(65, 89, 85)}_SLOTS_CONF`];
+  delete process.env["PANE_ON_G2_SLOTS_CONF"];
   for (const dir of tempDirs.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
 describe("JsonlTailer rotation", () => {
   it("switches to the newest session jsonl when Claude Code rotates sessions", async () => {
     const { cwd, projectDir, slotsConf } = makeClaudeProject("alpha");
-    process.env[`${String.fromCharCode(65, 89, 85)}_SLOTS_CONF`] = slotsConf;
+    process.env["PANE_ON_G2_SLOTS_CONF"] = slotsConf;
     vi.resetModules();
-    const providerDir = `${String.fromCharCode(97, 121, 117)}-even-provider`;
-    const { JsonlTailer } = await import(`../../../${providerDir}/src/jsonl-tail.js`);
+    const { JsonlTailer } = await import("../src/_vendor/jsonl-tail.js");
 
     const first = join(projectDir, "first.jsonl");
     const second = join(projectDir, "second.jsonl");

@@ -13,7 +13,7 @@ export class JsonlTailer {
   constructor(slot, onEvent, opts = {}) {
     this.slot = slot;
     this.onEvent = onEvent;
-    this.cwd = opts.cwd || "/srv/ayu-workspace";
+    this.cwd = opts.cwd || process.env.PANE_ON_G2_SESSION_CWD || process.cwd();
     this.pollMs = opts.pollMs || 500;
     this.path = null;
     this.position = 0;
