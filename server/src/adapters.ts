@@ -1,10 +1,7 @@
 import { execFileSync } from "node:child_process";
 
-const providerDir = `${String.fromCharCode(97, 121, 117)}-even-provider`;
-const providerSource = (file: string) => new URL(`../../../${providerDir}/src/${file}`, import.meta.url).href;
-
-const slotsModule = await import(providerSource("slots.js"));
-const jsonlModule = await import(providerSource("jsonl-tail.js"));
+const slotsModule = await import("./_vendor/slots.js");
+const jsonlModule = await import("./_vendor/jsonl-tail.js");
 const TMUX_TIMEOUT_MS = 5_000;
 
 export const listAllSlots = slotsModule.listAllSlots as () => unknown[];
