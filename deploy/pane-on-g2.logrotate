@@ -1,0 +1,8 @@
+/home/openclaw/.pane-on-g2/server.log {
+  daily
+  rotate 14
+  compress
+  missingok
+  notifempty
+  copytruncate
+}

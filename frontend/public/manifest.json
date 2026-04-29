@@ -1,0 +1,11 @@
+{
+  "name": "pane-on-g2",
+  "short_name": "g2 pane",
+  "description": "Even G2 companion display for tmux panes",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#06110d",
+  "theme_color": "#8ee8b2",
+  "icons": []
+}

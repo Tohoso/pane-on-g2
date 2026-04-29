@@ -1,0 +1,20 @@
+[Unit]
+Description=pane-on-g2 G2 companion server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/ayu-workspace/projects/pane-on-g2
+Environment=NODE_ENV=production
+Environment=PANE_ON_G2_BIND=127.0.0.1
+Environment=PANE_ON_G2_PORT=3457
+EnvironmentFile=-/srv/ayu-workspace/projects/pane-on-g2/.env.prod
+ExecStart=/srv/ayu-workspace/projects/pane-on-g2/scripts/prod-start.sh
+Restart=always
+RestartSec=5s
+StartLimitIntervalSec=60
+StartLimitBurst=6
+
+[Install]
+WantedBy=default.target

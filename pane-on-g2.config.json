@@ -1,0 +1,11 @@
+{
+  "label": "g2",
+  "slots": ["cc", "alpha", "beta", "gamma"],
+  "tmuxPrefix": "",
+  "ringReplies": {
+    "single_tap": { "text": "ack", "action": "prompt" },
+    "double_tap": { "text": "progress?", "action": "prompt" },
+    "long_press": { "text": "interrupt", "action": "interrupt" },
+    "triple_tap": { "text": "be terse", "action": "prompt" }
+  }
+}

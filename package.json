@@ -1,0 +1,38 @@
+{
+  "name": "pane-on-g2",
+  "version": "0.1.0-beta.0",
+  "description": "Mirror parallel Claude Code (or any tmux pane) to Even Realities G2 smart glasses with audio input and ring quick replies.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Toru Hosokawa",
+  "homepage": "https://github.com/Tohoso/pane-on-g2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tohoso/pane-on-g2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tohoso/pane-on-g2/issues"
+  },
+  "keywords": [
+    "even-realities",
+    "g2",
+    "smart-glasses",
+    "tmux",
+    "claude-code",
+    "ai",
+    "voice-input"
+  ],
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "bash scripts/dev.sh",
+    "test": "bash scripts/test.sh",
+    "build": "bash scripts/build.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "tsx": "^4.21.0"
+  }
+}

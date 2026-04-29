@@ -1,0 +1,11 @@
+{
+  "package_id": "dev.paneong2.app",
+  "edition": "202604",
+  "name": "pane-on-g2",
+  "version": "0.1.0",
+  "min_app_version": "0.1.0",
+  "tagline": "Mirror tmux panes to Even Realities G2",
+  "description": "Mirror parallel Claude Code sessions running in tmux to Even Realities G2, with companion text input, ring quick replies, and optional audio transcription.",
+  "author": "pane-on-g2 contributors",
+  "entrypoint": "index.html"
+}

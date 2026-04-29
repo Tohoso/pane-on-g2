@@ -1,0 +1,9 @@
+node_modules/
+.pnpm-store/
+dist/
+frontend/dist/
+server/dist/
+.env
+.env.local
+.env.prod
+frontend/.env.production

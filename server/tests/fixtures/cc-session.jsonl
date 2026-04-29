@@ -1,0 +1,5 @@
+{"type":"user","sessionId":"s1","message":{"role":"user","content":[{"type":"text","text":"G2から短く返して"}]}}
+{"type":"assistant","sessionId":"s1","message":{"id":"msg_1","content":[{"type":"text","text":"了解、生存。"},{"type":"tool_use","id":"tool_1","name":"Bash","input":{"command":"pnpm test"}}],"stop_reason":null,"usage":{"input_tokens":10,"output_tokens":4}}}
+{"type":"assistant","sessionId":"s1","message":{"id":"msg_1","content":[],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":4}}}
+{"type":"last-prompt","text":"metadata only"}
+not-json
