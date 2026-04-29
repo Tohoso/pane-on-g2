@@ -47,7 +47,7 @@ describe("Temple gestures", () => {
     vi.useRealTimers();
   });
 
-  it("bindTempleEvents calls onScrollUp and onScrollDown on eventTypes 1 and 2", () => {
+  it("bindTempleEvents calls onScrollUp and onScrollDown on eventTypes 1 and 2", async () => {
     const handlers: Array<(event: unknown) => void> = [];
     const bridge = {
       onEvenHubEvent: vi.fn((handler: (event: unknown) => void) => {
@@ -59,6 +59,7 @@ describe("Temple gestures", () => {
 
     bindTempleEvents(bridge, { onScrollUp, onScrollDown });
     handlers[0]({ textEvent: { eventType: 1 } });
+    await new Promise((resolve) => setTimeout(resolve, 360));
     handlers[0]({ listEvent: { eventType: 2 } });
 
     expect(onScrollUp).toHaveBeenCalledTimes(1);
@@ -121,6 +122,7 @@ describe("Temple gestures", () => {
     handlers[0]({ sysEvent: { eventType: 0 } });
     vi.advanceTimersByTime(260);
     handlers[0]({ sysEvent: { eventType: 1 } });
+    vi.advanceTimersByTime(360);
     handlers[0]({ sysEvent: { eventType: 2 } });
     handlers[0]({ sysEvent: { eventType: 3 } });
     vi.useRealTimers();
