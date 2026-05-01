@@ -35,7 +35,7 @@ export function bindTempleEvents(bridge: TempleBridge, handlers: TempleHandlers)
     }
   };
   let lastScrollAt = 0;
-  const SCROLL_DEBOUNCE_MS = 350;
+  const SCROLL_DEBOUNCE_MS = 800;
   const debouncedScroll = (handler?: () => void) => {
     const now = Date.now();
     if (now - lastScrollAt < SCROLL_DEBOUNCE_MS) return;

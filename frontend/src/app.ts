@@ -19,18 +19,51 @@ import {
 } from "./slot-state";
 import { formatStatusIndicator } from "./status-indicator";
 
-// Runtime config priority: localStorage > build-time env > defaults.
-// This makes the .ehpk reusable across self-hosters without rebuilding.
+// Runtime config priority: localStorage > cookie > build-time env > defaults.
+// Even App's WebView may use a non-persistent storage partition, so we write
+// to BOTH localStorage and an HTTP cookie (1-year max-age) and read from
+// either one on launch. Cookies survive WKWebView restarts that clear LS.
 const STORAGE_KEY = "pane-on-g2.config.v1";
+const COOKIE_KEY = "pane_on_g2_config_v1";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 type RuntimeConfig = { apiBase: string; token: string; label: string };
-function loadStoredConfig(): Partial<RuntimeConfig> {
+
+function readLocalStorage(): Partial<RuntimeConfig> | null {
   try {
     const raw = globalThis.localStorage?.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) as Partial<RuntimeConfig> : {};
-  } catch { return {}; }
+    return raw ? JSON.parse(raw) as Partial<RuntimeConfig> : null;
+  } catch { return null; }
+}
+function readCookie(): Partial<RuntimeConfig> | null {
+  try {
+    const raw = (globalThis.document?.cookie || "")
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(`${COOKIE_KEY}=`));
+    if (!raw) return null;
+    const value = decodeURIComponent(raw.slice(COOKIE_KEY.length + 1));
+    return JSON.parse(value) as Partial<RuntimeConfig>;
+  } catch { return null; }
+}
+function loadStoredConfig(): Partial<RuntimeConfig> {
+  return readLocalStorage() ?? readCookie() ?? {};
 }
 function saveStoredConfig(cfg: RuntimeConfig): void {
-  try { globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(cfg)); } catch { /* localStorage unavailable */ }
+  const json = JSON.stringify(cfg);
+  try { globalThis.localStorage?.setItem(STORAGE_KEY, json); } catch { /* unavailable */ }
+  try {
+    if (globalThis.document) {
+      globalThis.document.cookie = `${COOKIE_KEY}=${encodeURIComponent(json)}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+    }
+  } catch { /* cookie write blocked */ }
+}
+function clearStoredConfig(): void {
+  try { globalThis.localStorage?.removeItem(STORAGE_KEY); } catch { /* unavailable */ }
+  try {
+    if (globalThis.document) {
+      globalThis.document.cookie = `${COOKIE_KEY}=; path=/; max-age=0`;
+    }
+  } catch { /* unavailable */ }
 }
 const stored = loadStoredConfig();
 const apiBase = stored.apiBase ?? import.meta.env.VITE_PANE_ON_G2_API_BASE ?? "";
@@ -38,7 +71,7 @@ let token = stored.token ?? import.meta.env.VITE_PANE_ON_G2_TOKEN ?? "";
 const appLabel = stored.label ?? import.meta.env.VITE_PANE_ON_G2_LABEL ?? "g2";
 const app = document.querySelector<HTMLDivElement>("#app");
 const G2_BODY_CHARS = 240;
-const G2_SCROLL_STEP_CHARS = 80;
+const G2_SCROLL_STEP_CHARS = 50;
 
 if (!app) throw new Error("#app missing");
 

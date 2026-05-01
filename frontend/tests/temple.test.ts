@@ -59,7 +59,7 @@ describe("Temple gestures", () => {
 
     bindTempleEvents(bridge, { onScrollUp, onScrollDown });
     handlers[0]({ textEvent: { eventType: 1 } });
-    await new Promise((resolve) => setTimeout(resolve, 360));
+    await new Promise((resolve) => setTimeout(resolve, 820));
     handlers[0]({ listEvent: { eventType: 2 } });
 
     expect(onScrollUp).toHaveBeenCalledTimes(1);
@@ -122,7 +122,7 @@ describe("Temple gestures", () => {
     handlers[0]({ sysEvent: { eventType: 0 } });
     vi.advanceTimersByTime(260);
     handlers[0]({ sysEvent: { eventType: 1 } });
-    vi.advanceTimersByTime(360);
+    vi.advanceTimersByTime(820);
     handlers[0]({ sysEvent: { eventType: 2 } });
     handlers[0]({ sysEvent: { eventType: 3 } });
     vi.useRealTimers();
