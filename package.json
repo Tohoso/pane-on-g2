@@ -28,9 +28,13 @@
     "dev": "bash scripts/dev.sh",
     "test": "bash scripts/test.sh",
     "build": "bash scripts/build.sh",
-    "ehpk": "bash scripts/ehpk.sh"
+    "ehpk": "bash scripts/ehpk.sh",
+    "publish-login": "node tools/dev-portal/upload.mjs login",
+    "publish-beta": "node tools/dev-portal/upload.mjs publish",
+    "publish-status": "node tools/dev-portal/upload.mjs status"
   },
   "devDependencies": {
+    "playwright": "^1.59.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
