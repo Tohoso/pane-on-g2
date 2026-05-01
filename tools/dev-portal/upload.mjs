@@ -278,7 +278,7 @@ export async function openAppBuild(page, {
   packageId = PACKAGE_ID,
   appName = APP_JSON.name,
 } = {}) {
-  const dashboardUrls = [`${baseUrl}/dev`, `${baseUrl}/dashboard`, `${baseUrl}/apps`, baseUrl];
+  const dashboardUrls = [`${baseUrl}/hub`, `${baseUrl}/hub/apps`, `${baseUrl}/hub/dashboard`];
   const errors = [];
 
   for (const url of dashboardUrls) {

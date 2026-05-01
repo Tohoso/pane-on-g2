@@ -10,3 +10,4 @@ frontend/.env.production
 *.ehpk
 .dev-portal-state.json
 tools/dev-portal/last-error.png
+captured-traffic.json
