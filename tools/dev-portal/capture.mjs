@@ -16,6 +16,20 @@ const OUT = path.join(ROOT, "tools/dev-portal/captured-traffic.json");
 
 const events = [];
 const startedAt = Date.now();
+let captureCount = 0;
+
+function persist() {
+  try {
+    fs.mkdirSync(path.dirname(OUT), { recursive: true });
+    fs.writeFileSync(OUT, JSON.stringify(events, null, 2));
+  } catch (err) {
+    console.error("Failed to persist:", err.message);
+  }
+}
+
+const persistInterval = setInterval(persist, 1000);
+process.on("SIGINT", () => { persist(); process.exit(0); });
+process.on("SIGTERM", () => { persist(); process.exit(0); });
 
 const launchOpts = { headless: false };
 const ctxOpts = { viewport: null };
@@ -38,6 +52,8 @@ context.on("request", (req) => {
     headers: req.headers(),
     postData: req.postData()?.slice(0, 8192),
   });
+  captureCount += 1;
+  process.stdout.write(`\r[${captureCount} events] ${req.method()} ${url.slice(-60)}              `);
 });
 
 context.on("response", async (res) => {
@@ -71,6 +87,7 @@ console.log("=========================================================\n");
 // Block until the user closes the browser
 await new Promise((resolve) => browser.on("disconnected", resolve));
 
-fs.mkdirSync(path.dirname(OUT), { recursive: true });
-fs.writeFileSync(OUT, JSON.stringify(events, null, 2));
+clearInterval(persistInterval);
+persist();
 console.log(`\nSaved ${events.length} events to ${OUT}`);
+process.exit(0);
