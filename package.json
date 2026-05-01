@@ -30,7 +30,8 @@
     "build": "bash scripts/build.sh",
     "ehpk": "bash scripts/ehpk.sh",
     "publish-login": "node tools/dev-portal/upload.mjs login",
-    "publish-beta": "node tools/dev-portal/upload.mjs publish",
+    "publish-beta": "node tools/dev-portal/publish-api.mjs",
+    "publish-beta-ui": "node tools/dev-portal/upload.mjs publish",
     "publish-status": "node tools/dev-portal/upload.mjs status",
     "publish-capture": "node tools/dev-portal/capture.mjs"
   },
