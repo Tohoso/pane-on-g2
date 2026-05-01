@@ -403,18 +403,27 @@ function render() {
 }
 
 function renderG2Body(active: SlotSnapshot): { text: string; historyOffset: number } {
+  // Single source of truth: the current pane snapshot (last 200 lines of tmux
+  // capture-pane). Both live mode (offset=0) and history scroll (offset>0)
+  // window into the SAME text so 1 swipe = N chars feels predictable instead
+  // of teleporting between the live pane and the JSONL-derived turn archive.
+  const source = active.paneSnapshot.trim()
+    ? active.paneSnapshot
+    : active.assistantText
+      ? active.assistantText
+      : (() => {
+          const lastUser = [...active.transcript].reverse().find((turn) => turn.role === "user");
+          return lastUser ? `→ ${lastUser.text}` : "";
+        })();
+
   if (active.g2HistoryOffset <= 0) {
-    if (active.paneSnapshot.trim()) return { text: active.paneSnapshot, historyOffset: 0 };
-    if (active.assistantText) return { text: active.assistantText, historyOffset: 0 };
-    const lastUser = [...active.transcript].reverse().find((turn) => turn.role === "user");
-    if (lastUser) return { text: `→ ${lastUser.text}`, historyOffset: 0 };
-    return { text: "", historyOffset: 0 };
+    return { text: source, historyOffset: 0 };
   }
 
-  const maxOffset = computeMaxOffset(active);
+  const maxOffset = Math.max(0, Array.from(source).length - G2_BODY_CHARS);
   const historyOffset = clamp(active.g2HistoryOffset, 0, maxOffset);
   return {
-    text: windowAtOffset(buildG2FlatText(active.transcript, active.assistantText), historyOffset, G2_BODY_CHARS),
+    text: windowAtOffset(source, historyOffset, G2_BODY_CHARS),
     historyOffset,
   };
 }
@@ -531,8 +540,9 @@ function shiftG2History(delta: number) {
 }
 
 function computeMaxOffset(slot = state.slots[state.activeSlot]): number {
-  const flatLen = Array.from(buildG2FlatText(slot.transcript, slot.assistantText)).length;
-  return Math.max(0, flatLen - G2_BODY_CHARS);
+  const source = slot.paneSnapshot || slot.assistantText || "";
+  const len = Array.from(source).length;
+  return Math.max(0, len - G2_BODY_CHARS);
 }
 
 function clamp(value: number, min: number, max: number): number {
