@@ -119,5 +119,54 @@ export class PanePoller {
 function snapshotContent(raw: string): string {
   const sanitized = sanitizeAnsi(raw);
   const trimmed = trimCcChrome(sanitized.split("\n"));
-  return trimmed.slice(-MAX_VISIBLE_LINES).join("\n");
+  const folded = foldClaudeToolCalls(trimmed);
+  return folded.slice(-MAX_VISIBLE_LINES).join("\n");
+}
+
+// Claude Code renders tool invocations as `● Bash(...)` followed by indented
+// `⎿` continuation lines. On a 7-line G2 page that one tool call can drown
+// out everything else, so collapse each tool block into a single summary
+// line and drop its output entirely.
+const TOOL_CALL_START_RE = /^●\s+(\w+)\((.*)\)\s*$/;
+const TOOL_CALL_OUTPUT_RE = /^\s*⎿/;
+
+export function foldClaudeToolCalls(lines: string[]): string[] {
+  const result: string[] = [];
+  let pendingSummary: string | null = null;
+
+  const flushPending = () => {
+    if (pendingSummary !== null) {
+      result.push(pendingSummary);
+      pendingSummary = null;
+    }
+  };
+
+  for (const line of lines) {
+    const startMatch = line.match(TOOL_CALL_START_RE);
+    if (startMatch) {
+      flushPending();
+      const tool = startMatch[1];
+      const args = startMatch[2].trim();
+      const argsTrunc = args.length > 64 ? `${args.slice(0, 61)}...` : args;
+      pendingSummary = argsTrunc ? `▸ ${tool}: ${argsTrunc}` : `▸ ${tool}`;
+      continue;
+    }
+    if (pendingSummary !== null && TOOL_CALL_OUTPUT_RE.test(line)) {
+      // skip continuation of the current tool block
+      continue;
+    }
+    if (pendingSummary !== null && /^\s/.test(line) && line.trim() === "") {
+      // blank line ends the tool block
+      flushPending();
+      result.push(line);
+      continue;
+    }
+    if (pendingSummary !== null && !/^\s/.test(line)) {
+      // non-indented line means we left the tool block
+      flushPending();
+    }
+    result.push(line);
+  }
+  flushPending();
+  return result;
 }
