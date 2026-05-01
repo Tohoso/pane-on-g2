@@ -97,18 +97,38 @@ async function uploadDraft(auth, packageId) {
     execSync("bash scripts/ehpk.sh", { cwd: ROOT, stdio: "inherit" });
   }
   const ehpkBytes = fs.readFileSync(EHPK);
-  const form = new FormData();
-  form.set("file", new Blob([ehpkBytes], { type: "application/octet-stream" }), "pane-on-g2.ehpk");
-  const res = await fetch(`${BASE}/api/v1/versions/draft?package_id=${encodeURIComponent(packageId)}`, {
+  const candidateFields = ["package", "file", "ehpk", "upload"];
+  let lastError = "";
+  for (const fieldName of candidateFields) {
+    const form = new FormData();
+    form.set(fieldName, new Blob([ehpkBytes], { type: "application/octet-stream" }), "pane-on-g2.ehpk");
+    const res = await fetch(`${BASE}/api/v1/versions/draft?package_id=${encodeURIComponent(packageId)}`, {
+      method: "POST",
+      headers: authHeaders(auth.accessToken),
+      body: form,
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch { lastError = `non-JSON: ${text.slice(0, 200)}`; continue; }
+    if (res.ok && json.code === 0) {
+      console.log(`(draft uploaded with field "${fieldName}")`);
+      return json.data;
+    }
+    lastError = `code=${json.code} message=${json.message || ""}  field="${fieldName}"`;
+  }
+  die(`draft upload failed: ${lastError}`);
+}
+
+async function setBranchVersion(auth, packageId, versionName, branchName = "beta") {
+  const res = await fetch(`${BASE}/api/v1/apps/branch-version?package_id=${encodeURIComponent(packageId)}`, {
     method: "POST",
-    headers: authHeaders(auth.accessToken),
-    body: form,
+    headers: { ...authHeaders(auth.accessToken), "content-type": "application/json" },
+    body: JSON.stringify({ branch_name: branchName, version_name: versionName }),
   });
   const text = await res.text();
   let json;
-  try { json = JSON.parse(text); } catch { die(`draft response not JSON: ${text.slice(0, 200)}`); }
-  if (!res.ok || json.code !== 0) die(`draft upload failed (${res.status}): ${json.message || text.slice(0, 200)}`);
-  return json.data;
+  try { json = JSON.parse(text); } catch { die(`branch flip non-JSON response: ${text.slice(0, 200)}`); }
+  if (!res.ok || json.code !== 0) die(`branch flip failed: code=${json.code} message=${json.message || ""}`);
 }
 
 async function finalizeVersion(auth, packageId, draftId) {
@@ -140,7 +160,15 @@ async function main() {
   console.log(`Draft uploaded: ${draft.draft_id} (manifest version ${draft.manifest?.version})`);
 
   const version = await finalizeVersion(auth, packageId, draft.draft_id);
-  console.log(`\n✅ Published version ${version.version} (id ${version.id}, ${version.is_private ? "private" : "beta"})`);
+  console.log(`Version finalized: ${version.version} (id ${version.id})`);
+
+  const branch = process.env.PANE_ON_G2_PUBLISH_BRANCH || "beta";
+  if (branch !== "none") {
+    await setBranchVersion(auth, packageId, version.version, branch);
+    console.log(`Branch "${branch}" → ${version.version}`);
+  }
+
+  console.log(`\n✅ Published version ${version.version} on branch ${branch}`);
   console.log(`   File: ${version.file_size} bytes at ${version.package_path}`);
   console.log(`   Build URL: ${BASE}/hub/${packageId}`);
 }
